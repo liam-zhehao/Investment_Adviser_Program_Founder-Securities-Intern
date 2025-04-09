@@ -1,0 +1,61 @@
+server:
+    port: 18181
+    tomcat:
+        accesslog:
+            enabled: true
+            directory: /opt/logs/ifte-investment-adviser-webapp
+spring:
+    jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+        deserialization:
+            #允许对象忽略json中不存在的属性
+            fail_on_unknown_properties: false
+    application:
+        name: ifte-investment-adviser-webapp
+dubbo:
+    application:
+        name: ifte-financial_ifte-investment-adviser-webapp
+    monitor:
+        protocol: registry
+    protocol:
+        name: dubbo
+    registry:
+        protocol: zookeeper
+
+
+logging:
+    config: classpath:log/log4j2.xml
+
+foundersc:
+    health-check:
+        port: 33322
+
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+        map-underscore-to-camel-case: true
+    mapper-locations: classpath:mappers/**/*.xml
+    type-aliases-package: com.foundersc.ifte.invest.adviser.web.entity
+
+node-key:
+    oracle: osoadata
+    redis: redis_mystock
+
+url:
+    purchase: 'fzzqxf:///multifund/buy/?combineCode=%s'
+    epaper: '${domain.xf}/h5/financial/financing/index.html#/auth/counselorAgreement?combineCode=%s'
+    agreement: 'fzzqxf:///finance/general/agreementSign?prodCode=%s&prodType=%s&protocolUrl=%s'
+
+home-page:
+    instruction: "专业的事，交给专业的人"
+    copy-writing:
+        - title: "懂你"
+          subTitle: "明确投资目标"
+        - title: "陪你"
+          subTitle: "选择投资策略"
+        - title: "帮你"
+          subTitle: "系统自动调仓"
+
+# 是否注入统一网关
+register-api-gateway: false

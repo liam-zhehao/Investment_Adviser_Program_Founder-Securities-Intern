@@ -1,0 +1,63 @@
+@startuml
+
+title 组合详情
+
+actor 用户 as user
+participant H5 as h5
+participant 投顾webapp as tg
+participant 投顾dubbo as td
+participant 柜台 as counter
+
+user->h5: 进入组合详情页
+group 组合基本信息
+    h5->tg: 请求组合基本信息(/combine/info)
+    group 组合信息查询缓存#comb_info:comb_code:init_date#10min
+        tg->td: 【dubbo】查询组合基本信息
+            td->counter: 调用柜台【组合信息查询-10050029】
+            counter-->td: 返回组合信息
+        td-->tg: 【dubbo】返回组合基本信息
+        tg->tg: 根据组合成立日期，计算可选择行情区间
+    end
+    tg-->h5: 返回组合基本信息
+end
+
+group 组合行情走势图
+    h5->tg: 请求组合行情走势图(/combine/trend)
+    group 组合历史行情缓存#trend:comb_code:rangeId:init_date#10min
+        tg->td: 【dubbo】查询组合历史行情，传入rangeId
+            td->td: 根据rangeId和T-1交易日计算begin_date和end_date
+            td->counter: 调用柜台【组合历史行情查询-10050042】
+            counter-->td: 返回历史行情数据
+            td->td: 根据净值计算收益率
+        td-->tg: 【dubbo】返回组合历史行情
+    end
+    tg-->h5: 返回坐标数据
+end
+
+group 组合持仓详情
+    h5->tg: 请求组合持仓详情(/combine/position)
+    group 组合持仓详情缓存#position:comb_code:init_date#10min
+        tg->td: 【dubbo】查询组合持仓详情
+            td->counter: 调用柜台【组合成份信息查询-10050025】
+            counter-->td: 返回组合成份信息
+            td->td: 根据产品代码子类别（prodcode_sub_type）聚合
+        td-->tg: 【dubbo】返回组合持仓详情
+    end
+    tg->h5: 返回组合持仓详情
+end
+group 组合交易规则
+    h5->tg: 请求组合交易规则(/combine/tradeRule)
+    group 组合交易规则缓存#trade_rule:comb_code:init_date#10min
+        tg->td: 【dubbo】查询组合交易规则，传init_date
+            td->counter: 调用柜台【组合交易规则日期获取-10050102】\n 追加投资传2
+            counter-->td: 取预计确认日期pre_affirm_date和预计收益日期pre_income_date
+            td->counter: 调用柜台【组合交易规则日期获取-10050102】\n 减少投资传3
+            counter-->td: 取预计确认日期pre_affirm_date和预计到账日期pre_arrive_date
+            td->counter: 调用柜台【文案信息查询-10050035】
+            counter-->td: 根据文案类型copywriting_type取文案\n 4投顾服务费说明\n 1申购费说明\n 2赎回费说明\n 5申购规则\n 6赎回规则
+        td-->tg: 【dubbo】返回组合交易规则
+    end
+    tg-->h5: 返回交易规则
+end
+h5-->user: 展示组合详情
+@enduml

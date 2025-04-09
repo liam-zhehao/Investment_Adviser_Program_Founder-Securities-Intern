@@ -1,0 +1,43 @@
+@startuml
+
+title 组合持仓详情页
+
+actor 用户 as user
+participant APP as app
+participant 持仓webapp as tg
+participant 投顾dubbo as td
+participant 柜台 as counter
+
+user->app: 进入理财持仓页
+note left app
+投顾总持仓详见position.puml
+end note
+app-->user: 返回组合持仓列表
+
+user -> app: 点击组合区域
+group 组合持仓详情和持仓产品成分
+    app->tg: 请求持仓接口(/api/wealth/position/combine/detail)
+        tg->td: 【dubbo】查询组合持仓信息
+            td->counter: 调用柜台【组合资产查询-10050023】
+            counter-->td: 返回组合资产
+            td->counter: 调用柜台【组合成分产品查询-10050034】
+            counter-->td: 返回组合成分产品
+            td->counter: 调用柜台【组合可取资产查询-10050024】
+            counter-->td: 返回可取资产信息
+            td->td: 通过en_redeem_flag和\n min_fetch_ratio判断是否展示赎回按钮
+        td-->tg: 【dubbo】返回组合持仓页和成分产品
+    tg-->app: 返回客户持仓信息
+end
+group 组合行情信息
+    app->tg: 请求行情接口(/api/wealth/position/combine/pic)
+        tg->td: 【dubbo】查询组合行情信息
+            td->counter: 调用柜台【历史行情查询-10050042】
+            counter-->td: 返回历史行情信息
+            td->counter: 调用柜台【组合历史申请查询-10050043】
+            counter-->td: 返回组合历史申请
+            td->td: 整合历史行情和历史申请数据
+        td-->tg: 【dubbo】返回组合行情信息
+    tg-->app: 返回客户持仓信息
+end
+app-->user: 展示组合持仓详情
+@enduml

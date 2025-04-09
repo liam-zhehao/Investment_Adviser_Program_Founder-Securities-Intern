@@ -1,0 +1,32 @@
+@startuml
+title 购买时序图
+actor 用户 as user
+participant 小方app as app
+participant 理财后端 as financial
+participant 交易系统 as counter
+
+user -> app: 点击“下一步”
+activate app
+activate financial
+'financial->financial:生成6位短信验证码
+'financial->financial:在redis中存储改验证码\n<color:red>key:phone ;value:验证码;过期时间2分钟<color>
+financial->counter:获取待签署协议
+activate counter
+counter->financial:返回待签署协议
+financial->app:返回待签署协议
+app -> financial: 签署协议
+financial -> counter: 签署协议
+deactivate counter
+
+financial -> counter: 判断用户是否已签约该组合（getAgreementExt）
+activate counter
+alt 已签约
+    financial->counter:追加投资（postCombrequestAddInvestExt）
+else 未签约
+    financial->counter:组合签约（postAgreementSignExt），该接口包含购买金额字段
+end
+
+app -> financial: 点击“转出”
+financial -> counter: 减少投资（postCombrequestAddInvestExt）
+
+@enduml

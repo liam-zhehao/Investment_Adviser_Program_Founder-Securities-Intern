@@ -1,0 +1,59 @@
+@startuml
+
+title 转入流程图
+
+actor 用户 as user
+participant H5 as xf
+participant 投顾后端 as tg
+participant 柜台 as counter
+
+user->xf: 用户查看组合详情或用户持仓详情
+note left xf
+组合详情展示详情见detail.puml
+end note
+group 交易前检查
+    xf->tg: 请求交易前检查接口(/trade/preCheck)
+        note left tg
+            包括：1. 组合交易状态相关
+                 2. 客户是否允许交易检查
+                 3. 交易时间检查
+                 4. 解约中不能交易
+        end note
+        tg->tg: 组合信息查询
+        alt 组合交易状态为1（不允许交易）
+                tg-->xf: canTrade为false，给出cannotTradeTip
+        else
+            tg->counter: 调用柜台【是否允许交易检查-10050038】
+            counter-->tg: 返回检查结果allow_exch_flag
+            alt allow_exch_flag为0
+                tg-->xf: canTrade为false，给出cannotTradeTip
+            else
+                tg->counter: 调用柜台【查询投顾系统交易时间-10050115】
+                counter-->tg: 返回交易时间
+                tg->counter: 调用柜台【组合签约查询-10050072】
+                counter-->tg: 返回签约协议
+                note over tg
+                    如果返回的协议中有【已生效】，表示已签约
+                    其他状态待确认
+                    【解约中】不能交易
+                end note
+                alt 解约中-不可交易
+                    tg-->xf: canTrade为false，给出cannotTradeTip
+                else 未签约组合
+                    tg->tg: 查询签约协议的交易时间判断是否可签约，exchtime_kind为3
+                    alt 不可签约
+                        tg-->xf: canTrad为false，给出cannotTradeTip
+                    end
+                else
+                    tg->tg: 查询签约协议的交易时间判断是否可交易，exchtime_kind为2
+                    alt 不可交易
+                        tg-->xf: canTrade为false，给出cannotTradeTip
+                    end
+                end
+                tg-->xf: canTrade为true
+            end
+        end
+        xf->xf: 若canTrade字段为false，则【立即转入】或【转出】按钮置灰，且提示cannotTradeTip
+end
+xf-->user: 按钮展示
+@enduml

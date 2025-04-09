@@ -1,0 +1,168 @@
+@startuml
+
+title 转入流程图
+
+actor 用户 as user
+participant H5 as xf
+participant 投顾后端 as tg
+participant 柜台 as counter
+participant BOP as bop
+
+user->xf: 用户查看组合详情
+note left xf
+组合详情展示详情见detail.puml
+end note
+'group 交易（转入）前检查
+'    xf->tg: 请求交易前检查接口(/trade/preCheck)，tradeDirection传1
+'        note left tg
+'            包括：1. 组合交易状态相关
+'                 2. 客户是否允许交易检查（账户相关）
+'                 3. 交易时间限制检查
+'                 4. 解约中不能交易
+'        end note
+'        tg->tg: 组合信息查询
+'        alt 组合交易状态为1（不允许交易）
+'                tg-->xf: canTrade为false，给出cannotTradeTip
+'        else
+'            tg->counter: 调用柜台【是否允许交易检查-10050038】
+'            counter-->tg: 返回检查结果allow_exch_flag
+'            alt allow_exch_flag为0
+'                tg-->xf: canTrade为false，给出cannotTradeTip
+'            else
+'                tg->counter: 调用柜台【组合签约查询-10050072】
+'                counter-->tg: 返回签约协议
+'                note over tg
+'                    如果返回的协议中有【已生效】，表示已签约
+'                    其他状态待确认
+'                    【解约中】不能购买
+'                end note
+'                alt 解约中-不可签约或转入
+'                    tg-->xf: canTrade为false，给出cannotTradeTip
+'                else 未签约组合
+'                    tg->counter: 调用柜台【交易时间限制检查-待确认】\n comb_busin_type传1（组合签约）
+'                    counter->tg: 返回是否可签约
+'                    alt 不可签约
+'                        tg-->xf: canTrad为false，给出cannotTradeTip
+'                    end
+'                else
+'                    tg->counter: 调用柜台【交易时间限制检查-待确认】\n comb_busin_type传2（追加投资）
+'                    counter->tg: 返回是否可追加投资
+'                    alt 不可追加投资
+'                        tg-->xf: canTrade为false，给出cannotTradeTip
+'                    end
+'                end
+'                tg-->xf: canTrade为true
+'            end
+'        end
+'        xf->xf: 若canTrade字段为false，则【立即转入】按钮置灰，且提示cannotTradeTip
+'end
+note left xf
+转入前检查见check.puml
+end note
+xf-->user: 组合详情及转入按钮展示
+
+group 适当性校验
+    user->xf: 点击【立即转入】
+    xf->tg: 请求适当性校验接口(/trade/eligibility/check)
+    tg->counter: 调用柜台【客户组合适当性校验-10050064】
+    counter-->tg: 客户组合适当性校验结果
+    alt 正常返回-错误号为0
+        alt expire_risk_flag为1即风险测评过期\n或elig_risk_flag为0即适当性校验不通过
+            tg-->xf: 适当性校验不通过，不能购买，给出提示
+            xf-->user: 给出提示，重新测评
+        |||
+        else
+            alt elig_investkind_flag为0或elig_term_flag为0\n即投资品种弱匹配失败或投资期限弱匹配失败
+                tg-->xf: 适当性校验通过，相应字段赋值，适当性弱匹配结果
+            else
+                tg-->xf: 适当性校验通过，相应字段赋值，适当性匹配结果
+            end
+            xf-->user: 展示适当性匹配结果
+        end
+    |||
+    else
+        alt 返回错误号：【60045】投资品种不匹配禁止下单\n【60046】投资期限不匹配禁止下单
+            tg-->xf: 适当性校验不通过，不能购买，给出提示
+            xf-->user: 给出提示，重新测评
+        else
+            xf-->user: 适当性校验失败
+        end
+    note over xf
+        风险警示及留痕只在用户风险等级变化时提示，本期不做（郭老师）
+    end note
+end
+group 转入信息展示
+    user->xf: 跳转到转入页面
+    xf->tg: 请求转入页面信息(/trade/info/purchase)
+    tg->tg: 组合基本信息，计算快捷输入金额，下限及上限
+    tg->counter: 调用柜台【客户可用资金查询-10050037】
+    counter-->tg: 返回可用资金
+    group 文案缓存#purchase_info:comb_code#init_date#10min
+        tg->counter: 调用柜台【组合交易规则日期获取-10050102】
+        counter-->tg: 预计确认日期pre_affirm_date
+        tg->counter: 调用柜台【组合服务费参数查询-10050093】
+        counter-->tg: 返回费用比率fare_rate
+    end
+    tg-->xf: 接口返回
+    xf-->user: 转入信息展示
+end
+group 输入转入金额
+    user->xf: 输入转入金额
+    xf->xf: 判断转入金额与上下限是否匹配
+    alt 不匹配
+        xf-->user: 给出上下限提示
+    else
+        xf->xf: 判断转入金额与可用资金
+        alt 转入金额大于可用资金
+            xf-->user: 提示银证转账
+        else
+            xf-->user: 【下一步】可点击
+        end
+    end
+end
+group 协议签署
+    user->xf: 点击【下一步】
+    xf->tg: 请求获取协议列表接口(/trade/epaper/list)
+    tg->bop: 调用BOP接口【产品电子协议查询-809052】\n产品TA编号prodta_no传！\n产品代码prod_code传组合代码\nprod_type传空值（宏亮）\n金融品种finance_type传9
+    bop-->tg: 返回template_id及template_name、version_no等
+    note over tg
+        是否需要自己拼出适当性匹配协议？【不需要，适当性校验时匹配结果展示即可】
+    end note
+    group 电子协议模板内容缓存#epaper_content:template_id:version_no#1d
+        tg->bop: 调用BOP接口【电子协议模版下载-809068】\n传模板编码template_id、version_no
+            bop-->tg: 返回数据image_data
+            note over tg
+                image_data为base64编码的pdf文件【已跟胡志武确认】
+                base64编码的pdf文件前端应该可直接展示【已确认，待测试】
+            end note
+    end
+    tg->tg: 电子协议模板内容填充
+    tg-->xf: 返回协议列表及内容
+    xf-->user: 展示协议列表及内容
+end
+group 同意签署购买
+    user->xf: 点击【同意签署购买】
+    xf->tg: 请求协议签署接口(/trade/epaper/sign)
+    tg->bop: 调用BOP接口【电子协议签署-809053】\n传模板编码template_id、version_no\n拼接外部流水号ext_serial_no（已确认，唯一即可）
+    counter-->tg: 协议签署返回
+    xf->tg: 请求购买接口(/trade/purchase)
+    tg->counter: 调用BOP接口【电子协议签署流水查询-809054】
+    counter-->tg: 返回已签署的协议编码
+    alt 没有签署电子协议
+        tg-->xf: 返回没有签署电子协议的错误
+        xf-->user: 提示错误
+    end
+    tg->counter: 调用柜台【组合签约查询-10050072】
+    counter-->tg: 返回签约协议
+    tg->tg: 根据是否有【已生效】协议判断是否已签约
+    alt 未签约组合
+        tg->counter: 调用柜台【客户组合签约-10050009】\n 协议编号串为签署电子协议时返回的协议编码，多个怎么处理？
+        counter-->tg: 返回签约结果
+    else
+        tg->counter: 调用柜台【组合追加投资-10050051】\n 协议编号串为签署电子协议时返回的协议编码，多个怎么处理？
+        counter-->tg: 返回追加投资结果
+    end
+    tg-->xf: 返回购买结果
+    xf-->user: 提示是否购买成功
+end
+@enduml

@@ -1,0 +1,105 @@
+@startuml
+
+actor 用户 as user
+participant APP as APP
+participant 理财后端 as financial
+participant 柜台 as counter
+
+user -> APP: 点击基金投顾按钮，查看首页头部文案
+activate APP
+APP -> financial: 查询投顾首页头部文案（/welcomeInfo）
+activate financial
+financial -> financial:查询投顾首页头部文案
+financial -> APP: 返回投顾首页头部文案
+APP -> user:返回投顾首页头部文案
+user -> APP: 点击基金投顾按钮，查看kyc问卷或者组合推荐列表
+'note over APP
+'     如果用户未登录，引导登录
+'end note
+APP -> APP: 判断用户是否已登录
+
+alt 已登录
+    APP -> financial:用户是否答过最新问卷（/kyc/hasAnswered）
+    group 问卷信息缓存#paper_items#30min
+    financial->counter:【问卷查询-10050091】
+    activate counter
+    counter->financial:返回问卷
+    financial -> financial:问卷信息写入缓存/'#paper_items#30min'/
+    end
+    financial -> counter: 【客户答题记录查询-10050080】
+    counter -> financial: 返回查询结果
+
+
+    'alt 问卷信息和答题记录中的paper_version一致
+    '    financial -> APP: 返回答过最新问卷
+    'else 问卷信息和答题记录中返回的paper_version不一致
+    '    financial -> APP: 返回未答过最新问卷
+    'end
+    alt 存在用户答题记录，并且问卷信息和答题记录中的paper_version一致
+        financial -> APP: 返回用户已答题
+    else
+        financial -> APP: 返回用户未答题
+    end
+else 如果用户未登录
+    financial -> APP: 返回用户未答题
+end
+
+
+
+'financial -> APP: 用户是否答过最新问卷(存在用户答题记录，并且问卷信息和答题记录中的paper_version一致，\n则答过最新问卷；反之，没答过)
+alt 未答题
+        APP -> financial: 获取问卷(/kyc/paper)
+        financial->financial:缓存查询问卷
+        financial->APP:返回问卷
+        APP -> user:返回问卷
+        user->APP:填写问卷，提交问卷
+        note over APP
+             如果用户未登录，引导登录
+        end note
+        APP -> financial: 提交问卷答案
+        financial -> counter: 【提交问卷答案-10050079】
+        counter -> financial: 返回提交结果
+        alt 提交失败
+            financial -> APP: 返回“提交失败”
+            APP -> user: 返回提交失败错误信息
+        else
+            financial -> APP: 返回“提交成功”
+        end
+end
+'        financial -> APP: 返回“提交成功”
+'        APP -> APP: 获取投顾组合推荐列表（/kyc/match）
+
+'alt 已答题
+        group 投资需求展示
+            APP -> financial: 获取用户投资需求（/kyc/investDemand）
+            financial -> counter: 【客户答题记录查询-10050080】
+            counter -> financial: 返回客户答题记录。
+            financial -> financial: 问卷信息缓存查询（包含题号、答案、题目简称，问卷版本号）
+'            financial -> financial: 通过答题记录、问卷信息组装题目简称和答案
+            financial -> APP :返回投资需求列表(题目简称 + 答案)
+            APP -> user :返回投资需求列表页面
+        end
+
+        group  组合推荐列表
+            APP->financial: 获取组合推荐列表(/kyc/match)
+            financial -> counter: 【组合推荐列表查询-10050004】
+            note over financial
+'                 输入参数：order_direction：排序方向  待确认
+            end note
+            financial-> financial:在缓存查询组合基本信息
+            financial -> APP:返回推荐列表信息
+            APP -> user: 返回组合推荐列表页面
+        end
+'end
+
+user -> APP: 点击“调整需求”
+APP -> financial: 获取问卷(/kyc/paper)
+financial -> financial: 问卷信息缓存查询
+financial->APP:返回问卷
+APP->user:返回问卷页面
+
+
+deactivate APP
+deactivate financial
+deactivate counter
+@enduml

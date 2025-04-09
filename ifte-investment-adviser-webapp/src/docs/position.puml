@@ -1,0 +1,30 @@
+@startuml
+
+title 投顾总持仓
+
+actor 用户 as user
+participant APP as app
+participant 持仓webapp as tg
+participant 投顾dubbo as td
+participant 柜台 as counter
+
+user->app: 进入理财持仓页
+group 理财总资产和我的持仓列表
+    app->tg: 请求持仓接口(/api/financial/v2/mine/allPosition)
+    group 投顾总资产、投顾组合资产和在途委托
+        tg->td: 【dubbo】查询投顾持仓页信息
+            td->counter: 调用柜台【投顾账户查询-10050060】
+            counter-->td: 返回投顾账户信息
+            td->counter: 调用柜台【投顾总资产查询-10050019】
+            counter-->td: 返回投顾总资产
+            td->counter: 调用柜台【组合资产查询-10050023】
+            counter-->td: 返回组合资产
+            td->counter: 调用柜台【在途委托查询-10050031】
+            counter-->td: 返回在途委托
+        td-->tg: 【dubbo】返回投顾持仓页信息
+    end
+    tg->tg:将投顾资产和原总资产信息整合后返回
+    tg-->app: 返回客户持仓信息
+end
+app-->user: 展示总持仓和组合持仓列表
+@enduml

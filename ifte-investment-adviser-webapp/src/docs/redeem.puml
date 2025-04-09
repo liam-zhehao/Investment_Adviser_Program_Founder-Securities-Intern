@@ -1,0 +1,108 @@
+@startuml
+
+title 赎回流程图
+
+actor 用户 as user
+participant 小方app as xf
+participant 投顾后端 as tg
+participant 柜台 as counter
+
+user->xf: 用户查看持仓详情
+'group 交易（赎回）前检查
+'    xf->tg: 请求交易前检查接口(/trade/preCheck)，tradeDirection传2
+'        note over tg
+'            包括：1. 组合交易状态相关
+'                 2. 客户是否允许交易检查（账户相关）
+'                 3. 交易时间限制检查
+'                 4. 解约中不能交易
+'        end note
+'        tg->tg: 组合信息查询
+'        alt 组合交易状态为1（不允许交易）
+'                tg-->xf: canTrade为false，给出cannotTradeTip
+'        else
+'            tg->counter: 调用柜台【是否允许交易检查-10050038】
+'            counter-->tg: 返回检查结果allow_exch_flag
+'            alt allow_exch_flag为0
+'                tg-->xf: canTrade为false，给出cannotTradeTip
+'            else
+'                tg->counter: 调用柜台【组合签约查询-10050072】
+'                counter-->tg: 返回签约协议
+'                note over tg
+'                    如果返回的协议中有【已生效】，表示已签约
+'                    其他状态待确认
+'                    【解约中】不能赎回
+'                end note
+'                alt 解约中-不可赎回
+'                    tg-->xf: canTrade为false，给出cannotTradeTip
+''                else 全部赎回
+''                    tg->counter: 调用柜台【交易时间限制检查-待确认】\n comb_busin_type传7（组合解约）
+''                    counter->tg: 返回是否可全部赎回
+''                    alt 不可全部赎回
+''                        tg-->xf: canTrad为false，给出cannotTradeTip
+''                    else
+''                        tg-->xf: canTrade为true
+''                    end
+'                else
+'                    tg->counter: 调用柜台【交易时间限制检查-待确认】\n comb_busin_type传3（减少投资）
+'                    counter->tg: 返回是否可减少投资
+'                    alt 不可减少投资
+'                        tg-->xf: canTrad为false，给出cannotTradeTip
+'                    else
+'                        tg-->xf: canTrade为true
+'                    end
+'                end
+'            end
+'        end
+'        xf->xf: 若canTrade字段为false，则【转出】按钮置灰，且提示cannotTradeTip
+'end
+note left xf
+转入前检查见check.puml
+转出按钮还需要判断是否有可转出金额
+end note
+xf-->user: 持仓详情及转入转出按钮展示
+
+group 转出信息展示
+    user->xf: 点击【转出】，跳转到转出页面
+    xf->tg: 请求赎回页面信息(/trade/info/redeem)
+    tg->tg: 组合基本信息
+    tg->counter: 调用柜台【客户组合可取资产查询-10050024】
+    counter-->tg: 转出比例下限及上限，\n最小可取金额及最大可取金额\n是否支持全部赎回
+    tg->tg: 计算快捷输入比例
+    group 转出文案缓存#redeem_info:comb_code:init_date#10min
+        tg->counter: 调用柜台【组合交易规则日期获取-10050102】
+        counter-->tg: 预计确认日期pre_affirm_date
+        tg->counter: 调用柜台【组合服务费参数查询-10050093】
+        counter-->tg: 返回费用比率fare_rate
+    end
+    tg-->xf: 接口返回
+    xf-->user: 转出信息展示
+end
+group 输入转出比例
+    user->xf: 输入转出比例或快捷选择
+    xf->xf: 转出比例是否超出上下限
+    alt 超出上下限
+        xf-->user: 给出上下限提示，【下一步】不可点击
+    else
+        xf-->user: 【下一步】可点击
+    end
+end
+group 转出
+    user->xf: 点击转出【下一步】
+    xf->tg: 请求赎回接口(/trade/redeem)
+    tg->tg: 是否全部赎回
+    alt 全部赎回
+        tg->counter: 调用柜台【组合签约查询-10050017】
+        counter-->tg: 返回签约信息
+        alt 当天签约
+            tg-->xf: 解约失败
+        else
+            tg->counter: 调用柜台【客户组合解约-10050008】
+            counter-->tg: 返回解约结果
+    else
+        tg->counter: 调用柜台【组合减少投资-10050054】
+        counter-->tg: 返回减少投资结果
+    end
+    tg-->xf: 返回转出结果
+    xf-->user: 提示是否转出成功
+end
+@enduml
