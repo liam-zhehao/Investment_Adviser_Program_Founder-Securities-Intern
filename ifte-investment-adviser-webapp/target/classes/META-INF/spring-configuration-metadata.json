@@ -1,0 +1,61 @@
+{
+  "groups": [
+    {
+      "name": "home-page",
+      "type": "com.foundersc.ifte.invest.adviser.web.model.homepage.HomePageVO",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.model.homepage.HomePageVO"
+    },
+    {
+      "name": "invest-organ-infos",
+      "type": "com.foundersc.ifte.invest.adviser.web.model.kyc.InvestOrganInfos",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.model.kyc.InvestOrganInfos"
+    },
+    {
+      "name": "node-key",
+      "type": "com.foundersc.ifte.invest.adviser.web.config.support.NodeKeyProperties",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.config.support.NodeKeyProperties"
+    },
+    {
+      "name": "spring.datasource.druid",
+      "type": "javax.sql.DataSource",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.config.DruidDataSourceConfig",
+      "sourceMethod": "dataSource()"
+    },
+    {
+      "name": "spring.datasource.redis",
+      "type": "org.springframework.data.redis.connection.RedisConnectionFactory",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.config.RedisConfig",
+      "sourceMethod": "redisConnectionFactory()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "home-page.copywriting",
+      "type": "java.util.List<com.foundersc.ifte.invest.adviser.web.model.homepage.CopywritingVO>",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.model.homepage.HomePageVO"
+    },
+    {
+      "name": "home-page.instruction",
+      "type": "java.lang.String",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.model.homepage.HomePageVO"
+    },
+    {
+      "name": "invest-organ-infos.invest-organs",
+      "type": "java.util.List<com.foundersc.ifte.invest.adviser.web.model.kyc.InvestOrganVO>",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.model.kyc.InvestOrganInfos"
+    },
+    {
+      "name": "node-key.oracle",
+      "type": "java.lang.String",
+      "description": "oracle数据库的nodeKey",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.config.support.NodeKeyProperties"
+    },
+    {
+      "name": "node-key.redis",
+      "type": "java.lang.String",
+      "description": "xfapp数据库的nodeKey",
+      "sourceType": "com.foundersc.ifte.invest.adviser.web.config.support.NodeKeyProperties"
+    }
+  ],
+  "hints": []
+}

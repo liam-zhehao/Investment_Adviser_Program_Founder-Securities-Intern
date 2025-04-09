@@ -1,0 +1,23 @@
+# 模块名，需全局唯一
+module: ifte-investment-adviser-webapp
+
+# 模块描述
+desc: 投资顾问webapp
+
+# 服务端口号
+port: 18181
+
+# 服务IP地址（选填），不填默认获取本机地址，容器化部署时需要注意
+#ip: 100.119.0.21
+
+# 手动模式路由表
+routers:
+  - path: /gwc/investAdviser/api/investAdviser/clientAuth/**
+    clientAuth: 2
+  - path: /gwc/investAdviser/api/investAdviser/mobileAuth/**
+    clientAuth: 1
+  - path: /gwc/investAdviser/api/investAdviser/noAuth/**
+    clientAuth: 1
+
+# 路径截取
+stripprefix: 2

@@ -1,0 +1,34 @@
+[
+  {
+    "investOrganNo": "1101",
+    "investOrganName": "安心投顾",
+    "investOrganLogo": "https://static.fzzqcdn.com/edit/20230224/IMG_pingan2@3x.png",
+    "bannerPic": "https://static.fzzqcdn.com/edit/20230210/palist.png",
+    "detailPageTitle": "平安证券·安心投顾",
+    "detailPageDesc": "安心投顾通过全委托的“投”+陪伴式的“顾”，助力提升您的投资体验。平安证券是平安集团旗下重要成员，为您提供全方位投顾服务。"
+  },
+  {
+    "investOrganNo": "1004",
+    "investOrganName": "汇添富基金投顾",
+    "investOrganLogo": "https://static.fzzqcdn.com/edit/20230224/IMG_huitianfu2@3x.png",
+    "bannerPic": "https://static.fzzqcdn.com/edit/20230210/htflist.png",
+    "detailPageTitle": "汇添富投顾·跟我投",
+    "detailPageDesc": "汇添富基金投顾以投为脑、以顾为魂、科技为骨，依托专业的投资研究能力，提供一站式资产配置及全流程账户管理和客户陪伴服务。"
+  },
+  {
+    "investOrganNo": "1000",
+    "investOrganName": "易方达基金投顾",
+    "investOrganLogo": "https://static.fzzqcdn.com/edit/20230224/IMG_yifangda2@3x.png",
+    "bannerPic": "https://static.fzzqcdn.com/edit/20230210/yfdlist.png",
+    "detailPageTitle": "易方达基金投顾",
+    "detailPageDesc": "首批试点机构、全新省心投资；坚持客户利益至上、全市场科学选基。"
+  },
+  {
+    "investOrganNo": "1002",
+    "investOrganName": "中欧财富投顾",
+    "investOrganLogo": "https://static.fzzqcdn.com/edit/20230224/IMG_zhongou2@3x.png",
+    "bannerPic": "https://static.fzzqcdn.com/edit/20230210/zholist.png",
+    "detailPageTitle": "中欧财富投顾",
+    "detailPageDesc": "中欧财富是中欧基金旗下子公司，于2019年10月首批获准公募基金投顾试点资质，是业内为数不多拥有多年实盘运作经验的基金投顾机构。"
+  }
+]

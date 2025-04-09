@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.foundersc.ifte.invest.adviser.web.mapper.CombRequestRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.foundersc.ifte.invest.adviser.web.entity.CombRequestRecordEntity">
+        <result column="ID" property="id" />
+        <result column="CLIENT_ID" property="clientId" />
+        <result column="CLIENT_NAME" property="clientName" />
+        <result column="MOBILE" property="mobile" />
+        <result column="COMB_CODE" property="combCode" />
+        <result column="COMB_NAME" property="combName" />
+        <result column="BALANCE" property="balance" />
+        <result column="FUND_ACCOUNT" property="fundAccount" />
+        <result column="BRANCH_NO" property="branchNo" />
+        <result column="SYS_NO" property="sysNo" />
+        <result column="OP_STATION" property="opStation" />
+        <result column="RESP" property="resp" />
+        <result column="OPER_CODE" property="operCode" />
+        <result column="OPER_DESC" property="operDesc" />
+        <result column="OPER_IP" property="operIp" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="UPDATE_DATE" property="updateDate" />
+        <result column="CREATE_MONTH" property="createMonth" />
+        <result column="REDEEM_RATIO" property="redeemRatio" />
+        <result column="TRACE_ID" property="traceId" />
+        <result column="ORIG_COMB_REQUEST_NO" property="origCombRequestNo" />
+        <result column="COMB_REQUEST_NO" property="combRequestNo" />
+        <result column="ERROR_NO" property="errorNo" />
+        <result column="ERROR_INFO" property="errorInfo" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ID,
+        CLIENT_ID, CLIENT_NAME, MOBILE, COMB_CODE, COMB_NAME, BALANCE, FUND_ACCOUNT, BRANCH_NO, SYS_NO, OP_STATION, RESP, OPER_CODE, OPER_DESC, OPER_IP, CREATE_DATE, UPDATE_DATE, CREATE_MONTH, REDEEM_RATIO, TRACE_ID, ORIG_COMB_REQUEST_NO, COMB_REQUEST_NO, ERROR_NO, ERROR_INFO
+    </sql>
+
+</mapper>

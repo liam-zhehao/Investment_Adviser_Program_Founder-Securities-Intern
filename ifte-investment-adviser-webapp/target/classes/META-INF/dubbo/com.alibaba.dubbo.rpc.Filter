@@ -1,0 +1,1 @@
+logConTraceFilter=com.foundersc.ifte.invest.adviser.web.filter.DubboConsumerLogFilter

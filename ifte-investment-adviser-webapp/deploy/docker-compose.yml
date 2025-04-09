@@ -1,0 +1,15 @@
+version: '3'
+services:
+  app:
+    image: ${image}
+    restart: always
+    ports:
+      - ${port}:${expose}
+      - 33322:33322
+    environment:
+      FOUNDERSC_ENV: ${env}
+      GATEWAY_IP_TO_REGISTRY: ${ip}
+      GATEWAY_PORT_TO_REGISTRY: ${port}
+    volumes:
+      - "/opt/logs/${app}:/opt/logs/${app}"
+      - "/opt/applications/tingyun:/opt/applications/tingyun"
