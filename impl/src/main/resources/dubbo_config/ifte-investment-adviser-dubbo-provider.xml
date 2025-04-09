@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+    <dubbo:provider filter="logProTraceFilter"/>
+    <dubbo:consumer filter="logConTraceFilter"/>
+
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.AccountRemoteService" ref="accountRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.ClientAssetRemoteService" ref="clientAssetRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.IncomeInfoRemoteService" ref="incomeInfoRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.CombEntrustRemoteService" ref="combEntrustRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.CombineRemoteService" ref="combineRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.KycRemoteService" ref="kycRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.CombStrategyRemoteService" ref="combStrategyRemoteService"/>
+    <dubbo:service interface="com.foundersc.ifte.invest.adviser.dubbo.api.service.TradeTimeRemoteService" ref="tradeTimeRemoteService"/>
+
+</beans>

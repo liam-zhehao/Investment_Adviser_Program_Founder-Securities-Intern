@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- status表示Log4j2框架自身日志级别，monitorInterval表示配置文件监控周期（单位：秒），最小值：5 -->
+<configuration status="info" monitorInterval="60">
+    <Properties>
+        <!-- 属性配置 -->
+        <!-- $${sys:xxx}：使用系统变量作为属性，此处使用的是dubbo启动脚本中设置的[log.dir]与[log.file] -->
+        <Property name="LOG_DIR">/opt/logs/ifte-investment-adviser-dubbo-service</Property>
+        <Property name="LOG_FILE">${LOG_DIR}/info.log</Property>
+        <Property name="LOG_FILE_ERROR">${LOG_DIR}/error.log</Property>
+        <Property name="PATTERN">[TRACE_ID:%X{traceId}][%d{yyyy-MM-dd HH:mm:ss} %-5p] [%t] (%C:%L) - %msg%n</Property>
+        <property name="CHARSET">UTF-8</property>
+        <Property name="MAX_RESERVE">60d</Property>
+    </Properties>
+    <!-- 定义所有的appender -->
+    <Appenders>
+        <!-- 输出控制台的配置 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式，pattern表示日志格式，charset表示日志编码 -->
+            <PatternLayout pattern="${PATTERN}" charset="${CHARSET}"/>
+        </Console>
+        <!-- 文件输出配置，日志会自动进行压缩，作为存档 -->
+        <!-- name表示Appender名称，Logger中引用使用该属性；immediateFlush表示是否实时写入，一般设置为false（不实时写入） -->
+        <!-- fileName表示日志全路径；filePattern表示日志存档规则 -->
+        <RollingRandomAccessFile name="RollingRandomAccessFile" immediateFlush="false"
+                                 fileName="${LOG_FILE}" filePattern="${LOG_FILE}-%d{yyyyMMdd}.gz">
+            <PatternLayout pattern="${PATTERN}" charset="${CHARSET}"/>
+            <Policies>
+                <!-- 日志压缩，默认一天压缩一次 -->
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <!-- 日志保留策略 -->
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="1">
+                    <IfFileName glob="*.log*.gz"/>
+                    <!-- 最多保留age对应天数的日志 -->
+                    <IfLastModified age="${MAX_RESERVE}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+        <!--error日志-->
+        <RollingRandomAccessFile name="RollingErrorFile" immediateFlush="false"
+                                 fileName="${LOG_FILE_ERROR}" filePattern="${LOG_FILE_ERROR}-%d{yyyyMMdd}.gz">
+            <PatternLayout pattern="${PATTERN}" charset="${CHARSET}"/>
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <!-- 日志压缩，默认一天压缩一次 -->
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <!-- 日志保留策略 -->
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_DIR}" maxDepth="1">
+                    <IfFileName glob="*_error.log*.gz"/>
+                    <!-- 最多保留age对应天数的日志 -->
+                    <IfLastModified age="${MAX_RESERVE}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+    </Appenders>
+    <!-- 定义logger，只有定义了logger并引入的appender，appender才会生效 -->
+
+    <Loggers>
+        <!-- 建立一个异步logger，监听name对应的包名下的日志输出-->
+        <!-- level表示日志级别；additivity表示是否继续向父Logger写入 -->
+        <!-- includeLocation表示是否记录Logger的文件名和行号，对应 PatternLayout:pattern中(%C:%L)的配置是否生效 -->
+        <AsyncLogger name="com.foundersc" level="info" additivity="false" includeLocation="true">
+            <!-- 关联到appender才会在对应的位置输出日志，定义一个输出到文件的appender也必须关联到此处才会保存日志到文件 -->
+            <AppenderRef ref="RollingRandomAccessFile"/>
+            <AppenderRef ref="RollingErrorFile"/>
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+        <!-- 针对package定义logger -->
+        <AsyncLogger name="org.apache.dubbo" level="warn" additivity="false"/>
+        <AsyncLogger name="RocketmqClient" level="warn" additivity="false"/>
+        <!-- 建立一个默认的异步logger，未显示定义的所有日志都会被记录到默认logger中 -->
+        <AsyncRoot level="info" includeLocation="false">
+            <AppenderRef ref="RollingRandomAccessFile"/>
+            <AppenderRef ref="RollingErrorFile"/>
+            <AppenderRef ref="Console"/>
+        </AsyncRoot>
+    </Loggers>
+</configuration>

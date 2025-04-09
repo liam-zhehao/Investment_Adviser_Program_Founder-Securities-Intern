@@ -1,0 +1,23 @@
+spring:
+    application:
+        name: ifte-investment-adviser-dubbo-service
+dubbo:
+    application:
+        id: ifte-investment-adviser-dubbo-service
+        organization: ifte-financial
+        owner: ifte-financial
+    protocol:
+        id: dubbo
+        name: dubbo
+        threads: 600
+        port: 22005
+logging:
+    config: classpath:log/log4j2.xml
+
+foundersc:
+    health-check:
+        port: 33222
+
+support_7_24: true
+lowest_version_7_24: 8.31.0
+white_list_7_24: 2020027717,2020027767,2030041610,2865001987

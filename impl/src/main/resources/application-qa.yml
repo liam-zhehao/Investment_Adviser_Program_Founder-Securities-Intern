@@ -1,0 +1,4 @@
+spring:
+    profiles:
+        active: qa
+white_list_7_24: 71048729,85032188,2370007550,9868053255

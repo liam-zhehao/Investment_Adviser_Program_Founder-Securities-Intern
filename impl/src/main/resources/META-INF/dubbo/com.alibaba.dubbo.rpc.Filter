@@ -1,0 +1,2 @@
+logProTraceFilter=com.foundersc.ifte.invest.adviser.dubbo.filter.LogProviderFilter
+logConTraceFilter=com.foundersc.ifte.invest.adviser.dubbo.filter.DubboConsumerLogFilter

@@ -1,0 +1,5 @@
+spring:
+    profiles:
+        active: dev
+
+white_list_7_24: 82000581,82000734,82000820,82000914,82001677

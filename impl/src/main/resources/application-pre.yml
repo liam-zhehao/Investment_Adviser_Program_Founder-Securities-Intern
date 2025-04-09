@@ -1,0 +1,7 @@
+spring:
+    profiles:
+        active: pre
+
+support_7_24: false
+
+

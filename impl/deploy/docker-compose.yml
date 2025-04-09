@@ -1,0 +1,15 @@
+version: '3'
+services:
+  app:
+    image: ${image}
+    restart: always
+    ports:
+      - 22005:22005
+      - 33222:33222
+    environment:
+      FOUNDERSC_ENV: ${env}
+      DUBBO_IP_TO_REGISTRY: ${ip}
+      DUBBO_PORT_TO_REGISTRY: 22005
+    volumes:
+      - "/opt/logs/${app}:/opt/logs/${app}"
+      - "/opt/applications/tingyun:/opt/applications/tingyun"
